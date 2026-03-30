@@ -11,3 +11,9 @@ class User:
     name: str
     created_at: datetime
     is_active: bool
+
+    @staticmethod
+    def create(name: str) -> "User":
+        return User(
+            id=uuid.uuid7(), name=name, created_at=datetime.now(), is_active=True
+        )
