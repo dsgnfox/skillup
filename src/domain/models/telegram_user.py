@@ -1,15 +1,14 @@
-from datetime import datetime
 from dataclasses import dataclass
 from typing import Optional
+import uuid
 from .user import UserID
 
 
-@dataclass(frozen=True)
+@dataclass
 class TelegramUser:
+    id: uuid.UUID
     telegram_id: int
     first_name: str
-    user_id: Optional[UserID] = None
+    user_id: UserID
     username: Optional[str] = None
     last_name: Optional[str] = None
-    is_premium: bool = False
-    updated_at: datetime = datetime.now()
