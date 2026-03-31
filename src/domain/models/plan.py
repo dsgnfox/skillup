@@ -6,9 +6,9 @@ from src.domain.models.user import UserID
 
 
 class PlanStatus(Enum):
-    PROCESS_CREATION = 1
-    IN_PROGRESS = 2
-    COMPLETED = 100
+    DRAFT = 10  # Ожидает старта
+    IN_PROGRESS = 50  # Пользователь начал обучение (активен)
+    COMPLETED = 100  # Завершён
 
 
 @dataclass
