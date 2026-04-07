@@ -7,6 +7,7 @@ from pydantic_settings import (
     PydanticBaseSettingsSource,
 )
 
+from src.infra.config.ai import AiConfig
 from src.infra.config.database import DatabaseConfig
 from src.infra.config.telegram import TelegramSettings
 
@@ -15,16 +16,16 @@ ENVS_DIR = CONFIG_DIR / "envs"
 
 
 app_env = os.getenv("APP_ENV", "dev")
-print("=" * 20)
-print(ENVS_DIR, app_env)
-print("=" * 20)
 
 
 class Settings(BaseSettings):
     """Настройки приложения"""
 
+    name: str = "skill_up"
     telegram: TelegramSettings
     database: DatabaseConfig
+    ai: AiConfig
+    is_celery_worker: bool
 
     model_config = SettingsConfigDict(
         case_sensitive=False,

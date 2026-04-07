@@ -6,6 +6,10 @@ from src.domain.models.user import User, UserID
 class ITelegramUserRepository(Protocol):
     """Протокол репозитория пользователей телеграм"""
 
+    async def get_by_telegram_id(self, telegram_id: int) -> Optional[TelegramUser]:
+        """Получить Telegram данные по telegram_id"""
+        ...
+
     async def get_by_user_id(self, user_id: UserID) -> Optional[TelegramUser]:
         """Получить Telegram данные по user_id"""
         ...

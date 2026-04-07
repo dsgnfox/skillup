@@ -8,9 +8,9 @@ from src.application.commands.user_register_via_telegram import (
 from src.domain.exceptions.telegram_already_added import TelegramAlreadyAdded
 
 
-class TelegramController:
+class TelegramControllerStart:
     """
-    Представление телеграм: отвечает за получение обновлений и вызов доменных команд
+    Контроллер запуска бота
     """
 
     def __init__(self, bot: Bot):
@@ -21,28 +21,6 @@ class TelegramController:
 
     @inject
     async def handle_start(
-        self,
-        message: types.Message,
-        register_cmd: FromDishka[IRegisterUserViaTelegramCommand],
-    ):
-        user_data = message.from_user
-        if not user_data:
-            return
-
-        payload = RegisterUserViaTelegramPayload(
-            telegram_id=user_data.id,
-            first_name=user_data.first_name,
-            username=user_data.username,
-        )
-
-        try:
-            user = await register_cmd.execute(payload)
-            await message.answer(f"Привет, {user.name}! Вы успешно зарегистрированы.")
-        except TelegramAlreadyAdded:
-            await message.answer("Вы уже зарегистрированы!")
-
-    @inject
-    async def handle_create_plan_request(
         self,
         message: types.Message,
         register_cmd: FromDishka[IRegisterUserViaTelegramCommand],

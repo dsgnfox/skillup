@@ -51,6 +51,13 @@ class RegisterUserViaTelegramCommand(BaseCommand):
         )
         await self.tg_user_repo.save(tg_user)
 
-        await self.event_bus.publish(UserRegisterEvent(user))
+        await self.event_bus.publish(
+            UserRegisterEvent(
+                user_id=user.id,
+                name=user.name,
+                created_at=user.created_at,
+                is_active=user.is_active,
+            )
+        )
 
         return user

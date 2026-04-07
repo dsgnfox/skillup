@@ -5,7 +5,7 @@ from src.infra.config.settings import Settings
 from src.infra.config.telegram import TelegramSettings
 
 
-class ConfigProvider(Provider):
+class SettingsProvider(Provider):
     """Провайдер настроек"""
 
     scope = Scope.APP
