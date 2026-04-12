@@ -1,13 +1,12 @@
 from sqlalchemy import (
     UUID,
+    Integer,
     Table,
     Column,
     String,
     ForeignKey,
-    Enum as SQLEnum,
 )
 
-from src.domain.models.plan import PlanStatus
 from ..metadata import metadata
 
 
@@ -25,8 +24,7 @@ plans_table = Table(
     ),
     Column(
         "status",
-        SQLEnum(PlanStatus, name="status"),
+        Integer,
         nullable=False,
-        default=PlanStatus.DRAFT,
     ),
 )

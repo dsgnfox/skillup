@@ -1,3 +1,5 @@
+from datetime import datetime
+import uuid
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.domain.models.plan_request import PlanRequest
@@ -33,6 +35,8 @@ class SQLAlchemyPlanRequestRepository(IPlanRequestRepository):
             if field_value is not None:
                 setattr(plan_request, field_name, field_value)
 
+        plan_request.updated_at = datetime.now()
+
         await self._session.flush()
         return plan_request
 
@@ -40,3 +44,8 @@ class SQLAlchemyPlanRequestRepository(IPlanRequestRepository):
         stmt = select(PlanRequest).where(plan_requests_table.c.user_id == user_id)
         result = await self._session.execute(stmt)
         return list(result.scalars().all())
+
+    async def get_by_id(self, id: uuid.UUID) -> PlanRequest | None:
+        stmt = select(PlanRequest).where(plan_requests_table.c.id == id)
+        result = await self._session.execute(stmt)
+        return result.scalar_one_or_none()

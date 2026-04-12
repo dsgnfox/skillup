@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from datetime import datetime
 from uuid import UUID
 from src.domain.events.base_event import BaseDomainEvent
-from src.domain.models.user import User
 
 
 @dataclass(frozen=True)

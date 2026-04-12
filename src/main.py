@@ -3,7 +3,6 @@ from aiogram import Bot, Dispatcher
 from dishka.integrations.aiogram import setup_dishka
 from src.infra.di.main import init_container
 from src.infra.logger import ILogger
-from src.infra.views.telegram.controller import TelegramController
 from src.infra.views.telegram.plan_create.plan_create_controller import (
     TelegramControllerPlanCreate,
 )

@@ -13,6 +13,11 @@ class SQLAlchemyPlanRepository(IPlanRepository):
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
+    async def create(self, plan: Plan) -> Plan:
+        self._session.add(plan)
+        await self._session.flush()
+        return plan
+
     async def get_all_by_user_id(self, user_id: UserID) -> List[Plan]:
         stmt = select(Plan).where(plans_table.c.user_id == user_id)
         result = await self._session.execute(stmt)

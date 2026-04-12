@@ -1,17 +1,13 @@
 from sqlalchemy import (
     UUID,
+    Integer,
     Table,
     Column,
     String,
     DateTime,
     ForeignKey,
-    Enum as SQLEnum,
 )
-from sqlalchemy.dialects.postgresql import ENUM
 
-from src.domain.models.plan_request import (
-    PlanRequestStatus,
-)
 from ..metadata import metadata
 
 
@@ -28,7 +24,7 @@ plan_requests_table = Table(
     ),
     Column(
         "status",
-        SQLEnum(PlanRequestStatus, name="status"),
+        Integer,
         nullable=False,
     ),
     Column("request", String(), nullable=False),

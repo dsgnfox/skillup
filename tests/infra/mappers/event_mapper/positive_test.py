@@ -1,0 +1,83 @@
+import pytest
+from uuid import uuid4, UUID
+from datetime import datetime
+from dataclasses import dataclass
+from src.domain.events.base_event import BaseDomainEvent
+from src.infra.mappers.event_mapper import EventMapper
+
+
+# Сущности для теста вложенности
+@dataclass(frozen=True)
+class Level3(BaseDomainEvent):
+    value: str
+
+
+@dataclass(frozen=True)
+class Level2(BaseDomainEvent):
+    nested: Level3
+
+
+@dataclass(frozen=True)
+class Level1(BaseDomainEvent):
+    nested: Level2
+
+
+# Базовые тестовые сущности
+@dataclass(frozen=True)
+class SimpleEvent(BaseDomainEvent):
+    id: str
+
+
+@dataclass(frozen=True)
+class ComplexEvent(BaseDomainEvent):
+    event_id: UUID
+    created_at: datetime
+    payload: str
+
+
+def test_to_dict_positive_simple():
+    """Проверка корректной сериализации простого датакласса в словарь"""
+    event = SimpleEvent(id="123")
+    result = EventMapper.to_dict(event)
+    assert result == {"id": "123"}
+
+
+def test_to_dict_positive_with_uuid_and_datetime():
+    """Проверка сериализации объектов UUID и datetime (должны остаться объектами перед json.dumps)"""
+    u = uuid4()
+    now = datetime.now()
+    event = ComplexEvent(event_id=u, created_at=now, payload="test")
+    result = EventMapper.to_dict(event)
+
+    assert result["event_id"] == u
+    assert result["created_at"] == now
+
+
+def test_from_dict_positive_complex():
+    """Проверка десериализации из словаря со строками в объекты UUID и datetime"""
+    u = uuid4()
+    now = datetime.now()
+    data = {
+        "event_id": str(u),
+        "created_at": now.isoformat(),
+        "payload": "data",
+    }
+    event = EventMapper.from_dict(data, ComplexEvent)
+
+    assert isinstance(event.event_id, UUID)
+    assert isinstance(event.created_at, datetime)
+    assert event.event_id == u
+
+
+def test_nested_dataclasses_three_levels():
+    """Проверка корректной обработки вложенных структур до 3-го уровня включительно"""
+    data = {"nested": {"nested": {"value": "deep_val"}}}
+    event = EventMapper.from_dict(data, Level1)
+
+    assert isinstance(event.nested, Level2)
+    assert isinstance(event.nested.nested, Level3)
+    assert event.nested.nested.value == "deep_val"
+
+    # Обратный маппинг
+    dict_back = EventMapper.to_dict(event)
+    assert dict_back == data

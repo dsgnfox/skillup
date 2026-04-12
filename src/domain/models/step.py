@@ -5,9 +5,10 @@ import uuid
 from src.domain.models.user import UserID
 
 
-class StepStatus(Enum):
-    IN_PROGRESS = 2
-    COMPLETED = 100
+class StepStatus(int, Enum):
+    DRAFT = 10  # Ожидает старта
+    IN_PROGRESS = 50  # Пользователь начал обучение (активен)
+    COMPLETED = 100  # Завершён
 
 
 @dataclass
@@ -19,3 +20,4 @@ class Step:
     content: str
     status: StepStatus
     user_id: UserID
+    plan_id: uuid.UUID

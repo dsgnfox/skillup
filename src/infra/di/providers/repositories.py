@@ -1,5 +1,7 @@
 from dishka import Provider, Scope, provide
 
+from src.domain.ports.step_repository import IStepRepository
+from src.infra.repositories.step_repository import SQLAlchemyStepRepository
 from src.domain.ports.plan_repository import IPlanRepository
 from src.domain.ports.plan_request_repository import IPlanRequestRepository
 from src.domain.ports.telegram_user_repository import ITelegramUserRepository
@@ -27,3 +29,4 @@ class RepositoriesProvider(Provider):
     plan_requests_repo = provide(
         SQLAlchemyPlanRequestRepository, provides=IPlanRequestRepository
     )
+    step_repo = provide(SQLAlchemyStepRepository, provides=IStepRepository)

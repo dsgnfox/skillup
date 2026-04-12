@@ -1,10 +1,14 @@
 from typing import AsyncGenerator, Type
 
 from dishka import Provider, Scope, provide, AsyncContainer
+from src.application.event_handlers.plan_creation_complete import (
+    PlanCreationCompleteHandler,
+)
 from src.application.event_handlers.plan_request_submitted import (
     PlanRequestSubmittedHandler,
 )
 from src.domain.events.base_event import BaseDomainEvent
+from src.domain.events.plan_creation_complete import PlanCreationCompleteEvent
 from src.domain.events.plan_request_submitted import PlanRequestSubmittedEvent
 from src.domain.ports.event_bus import IEventBus, IHandlerFactory
 from src.infra.config.settings import Settings
@@ -14,6 +18,7 @@ from src.infra.logger import ILogger
 
 EVENT_SUBSCRIBERS: list[tuple[Type[BaseDomainEvent], Type]] = [
     (PlanRequestSubmittedEvent, PlanRequestSubmittedHandler),
+    (PlanCreationCompleteEvent, PlanCreationCompleteHandler),
 ]
 
 
@@ -30,10 +35,12 @@ class EventBusProvider(Provider):
     ) -> AsyncGenerator[IEventBus, None]:
         bus = RedisEventBus(handler_factory=factory, logger=logger)
 
+        await bus.init()
+
         if not settings.is_celery_worker:
             for event_type, handler_cls in EVENT_SUBSCRIBERS:
-                bus.subscribe(event_type, handler_cls)
+                await bus.subscribe(event_type, handler_cls)
 
-        await bus.init()
+        await bus.start_listening()
         yield bus
         await bus.close()

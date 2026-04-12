@@ -1,13 +1,14 @@
 import asyncio
 import json
 from typing import Dict, List, Type, Any
-from dataclasses import asdict
 import redis.asyncio as redis
 from redis.asyncio.client import PubSub
 from src.domain.events.base_event import BaseDomainEvent
 from src.domain.ports.event_bus import IEventBus, IHandlerFactory
 from src.infra.event_bus.exception import RedisEventBusException
+from src.infra.exceptions.event_mapper_exception import EventMapperException
 from src.infra.logger import ILogger
+from src.infra.mappers.event_mapper import EventMapper
 
 
 class RedisEventBus(IEventBus):
@@ -37,15 +38,19 @@ class RedisEventBus(IEventBus):
         self._logger.debug("Инициализация")
 
     async def init(self) -> None:
-        """
-        Инициализирует соединения и запускает фоновое прослушивание.
-        """
         self._redis = redis.from_url(self._redis_url)
         self._pubsub = self._redis.pubsub()
+        # НЕ запускаем здесь loop сразу
+        self._logger.debug("Соединение с Redis установлено")
 
-        # Запускаем фоновую задачу
+    async def start_listening(self) -> None:
+        """Отдельный метод для запуска цикла"""
+        if self._handlers and self._pubsub:
+            # Подписываемся ДО запуска цикла
+            await self._pubsub.subscribe(*self._handlers.keys())
+
         self._listen_task = asyncio.create_task(self._listen_loop())
-        self._logger.debug("Сервис запущен")
+        self._logger.debug("Цикл прослушивания запущен")
 
     async def close(self) -> None:
         """
@@ -65,7 +70,9 @@ class RedisEventBus(IEventBus):
 
         self._logger.debug("Сервис остановлен")
 
-    def subscribe(self, event_type: Type[BaseDomainEvent], handler_cls: Type) -> None:
+    async def subscribe(
+        self, event_type: Type[BaseDomainEvent], handler_cls: Type
+    ) -> None:
         """Регистрирует класс обработчика для события."""
 
         channel_name = event_type.__name__
@@ -76,7 +83,7 @@ class RedisEventBus(IEventBus):
 
             # Динамически подписываемся в Redis, если цикл уже запущен
             if self._pubsub:
-                asyncio.create_task(self._pubsub.subscribe(channel_name))
+                await self._pubsub.subscribe(channel_name)
 
         self._handlers[channel_name].append(handler_cls)
         self._logger.debug(
@@ -85,18 +92,26 @@ class RedisEventBus(IEventBus):
         )
 
     async def publish(self, event: BaseDomainEvent) -> None:
-        """Публикует событие в Redis."""
-
+        """Публикует событие в Redis, используя EventMapper."""
         if not self._redis:
             raise RedisEventBusException(
                 "RedisEventBus не инициализирован. Вызовите init()."
             )
 
-        channel_name = event.__class__.__name__
-        event_data = json.dumps(asdict(event), default=str)
+        try:
+            channel_name = event.__class__.__name__
+            dict_data = EventMapper.to_dict(event)
+            event_data = json.dumps(dict_data, default=str)
 
-        await self._redis.publish(channel_name, event_data)
-        self._logger.debug("Новое событие", {"event": event.__class__.__name__})
+            await self._redis.publish(channel_name, event_data)
+            self._logger.debug(
+                "Новое событие опубликовано",
+                {"event": channel_name, "event_data": event_data},
+            )
+        except EventMapperException as e:
+            raise RedisEventBusException(f"Ошибка маппинга при публикации: {e}")
+        except Exception as e:
+            raise RedisEventBusException(f"Ошибка при публикации в Redis: {e}")
 
     async def _listen_loop(self) -> None:
         """Бесконечный цикл чтения сообщений с использованием идиоматичного listen()"""
@@ -115,10 +130,12 @@ class RedisEventBus(IEventBus):
         except asyncio.CancelledError:
             self._logger.info("[Redis EventBus] Фоновая задача остановлена.")
         except Exception as e:
-            RedisEventBusException("Критическая ошибка в цикле прослушивания: {e}")
+            raise RedisEventBusException(
+                "Критическая ошибка в цикле прослушивания: {e}"
+            )
 
     async def _process_message(self, message: dict) -> None:
-        """Обработка одного сырого сообщения из Redis."""
+        """Обработка сообщения с десериализацией через EventMapper."""
 
         channel_name = message["channel"].decode("utf-8")
         data_str = message["data"].decode("utf-8")
@@ -131,16 +148,17 @@ class RedisEventBus(IEventBus):
 
         try:
             event_dict = json.loads(data_str)
+            event_instance = EventMapper.from_dict(event_dict, event_cls)
 
-            # Восстанавливаем полноценный инстанс датакласса события
-            event_instance = event_cls(**event_dict)
-
-            # На каждый хэндлер создаем изолированную корутину, чтобы они работали параллельно
             for handler_cls in handler_classes:
                 asyncio.create_task(self._run_handler(handler_cls, event_instance))
 
+        except EventMapperException as e:
+            self._logger.error(f"Ошибка восстановления события {channel_name}: {e}")
+        except json.JSONDecodeError as e:
+            self._logger.error(f"Невалидный JSON в канале {channel_name}: {e}")
         except Exception as e:
-            RedisEventBusException(f"Ошибка парсинга события {channel_name}: {e}")
+            self._logger.error(f"Непредвиденная ошибка при обработке сообщения: {e}")
 
     async def _run_handler(self, handler_cls: Type, event: Any) -> None:
         """
@@ -148,11 +166,10 @@ class RedisEventBus(IEventBus):
         """
 
         try:
-            # Используем исправленный метод фабрики
             async with self._factory.create_handler(handler_cls) as handler:
-                await handler(event)
+                await handler.handle(event)
 
         except Exception as e:
-            RedisEventBusException(
+            raise RedisEventBusException(
                 f"Ошибка в обработчике события {handler_cls.__name__}: {e}"
             )

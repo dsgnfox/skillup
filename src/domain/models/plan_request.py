@@ -7,7 +7,7 @@ import uuid
 from src.domain.models.user import UserID
 
 
-class PlanRequestStatus(Enum):
+class PlanRequestStatus(int, Enum):
     PENDING = 0  # Запрос принят, ждёт обработки
     PROCESSING = 10  # Запрос в процессе обработки
     COMPLETED = 20  # Обработка запроса успешно завершена

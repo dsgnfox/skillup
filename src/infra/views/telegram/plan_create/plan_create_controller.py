@@ -61,17 +61,14 @@ class TelegramControllerPlanCreate:
             await create_plan_cmd.execute(
                 CreatePlanPayload(user_id=telegram_user.user_id, request=request)
             )
+            await message.answer(
+                "План обучения создается. Мы сообщим, когда он будет готов"
+            )
         except UserHasActivePlanRequest:
             await message.answer("У вас уже есть активный план обучения")
-            await state.clear()
         except UserHasInProcessPlan:
             await message.answer("План обучения в процессе создания, ожидайте...")
-            await state.clear()
         except:
             await message.answer("Непредвиденная ошибка, пожалуйста повторите запрос")
-            await state.clear()
 
-        await message.answer(
-            "План обучения создается. Мы сообщим, когда он будет готов"
-        )
         await state.clear()

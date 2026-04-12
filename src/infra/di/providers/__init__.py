@@ -1,4 +1,5 @@
 from src.infra.di.providers.commands import CommandProvider
+from src.infra.di.providers.event_handlers import EventHandlerProvider
 from src.infra.di.providers.settings import SettingsProvider
 from src.infra.di.providers.db import DatabaseProvider
 from src.infra.di.providers.event_bus import EventBusProvider
@@ -15,4 +16,5 @@ providers = (
     RepositoriesProvider(),
     InfrastructureProvider(),
     EventBusProvider(),
+    EventHandlerProvider(),
 )

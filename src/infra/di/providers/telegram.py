@@ -1,7 +1,6 @@
 from aiogram import Bot
 from dishka import Provider, Scope, provide
 from src.infra.config.telegram import TelegramSettings
-from src.infra.views.telegram.controller import TelegramController
 from src.infra.views.telegram.plan_create.plan_create_controller import (
     TelegramControllerPlanCreate,
 )

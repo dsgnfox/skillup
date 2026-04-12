@@ -11,6 +11,7 @@ class PlanRequestUpdateDTO:
 
     id: uuid.UUID
     status: Optional[PlanRequestStatus]
+    request: Optional[str] = None
     plan_id: Optional[uuid.UUID] = None
     error_msg: Optional[str] = None
 

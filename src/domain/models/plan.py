@@ -5,7 +5,7 @@ import uuid
 from src.domain.models.user import UserID
 
 
-class PlanStatus(Enum):
+class PlanStatus(int, Enum):
     DRAFT = 10  # Ожидает старта
     IN_PROGRESS = 50  # Пользователь начал обучение (активен)
     COMPLETED = 100  # Завершён

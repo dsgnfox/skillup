@@ -1,4 +1,5 @@
 from typing import Protocol
+import uuid
 
 from src.domain.models.plan_request import PlanRequest
 from src.domain.models.user import UserID
@@ -18,4 +19,8 @@ class IPlanRequestRepository(Protocol):
 
     async def get_all_by_user_id(self, user_id: UserID) -> list[PlanRequest]:
         """Получить запросы на планы обучения по ID пользователя"""
+        ...
+
+    async def get_by_id(self, id: uuid.UUID) -> PlanRequest | None:
+        """Получить запрос на план обучения по ID"""
         ...

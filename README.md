@@ -10,5 +10,5 @@ docker compose up -d
 ```
 ```
 python3 -m src.main
-celery -A src.infra.background_tasks.generate_plan worker
+celery -A src.infra.celery_start:celery_app worker --loglevel=info
 ```
