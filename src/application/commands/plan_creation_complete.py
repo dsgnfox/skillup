@@ -74,11 +74,9 @@ class PlanCreationCompleteCommand(BaseCommand):
         # Создаем шаги обучения с привязкой к плану
         plan_id = uuid.uuid7()
         steps = [
-            Step(
-                id=uuid.uuid7(),
-                name=step_item.title,
-                content=step_item.description,
-                status=StepStatus.DRAFT,
+            Step.create(
+                title=step_item.title,
+                description=step_item.description,
                 user_id=plan_request.user_id,
                 plan_id=plan_id,
             )

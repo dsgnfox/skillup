@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
 import uuid
 
@@ -21,3 +22,18 @@ class Step:
     status: StepStatus
     user_id: UserID
     plan_id: uuid.UUID
+    created_at: datetime
+
+    @staticmethod
+    def create(
+        title: str, description: str, user_id: UserID, plan_id: uuid.UUID
+    ) -> "Step":
+        return Step(
+            id=uuid.uuid7(),
+            name=title,
+            content=description,
+            status=StepStatus.DRAFT,
+            user_id=user_id,
+            plan_id=plan_id,
+            created_at=datetime.now(),
+        )

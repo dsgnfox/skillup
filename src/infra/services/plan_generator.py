@@ -21,7 +21,7 @@ class PlanGeneratorService(IPlanGeneratorService):
         request_data = {
             "id": plan_request.id,
             "request": plan_request.request,
-            "user_id": str(plan_request.user_id),
+            "user_id": plan_request.user_id,
         }
 
         self._logger.info("plan request data", {"request_data": request_data})

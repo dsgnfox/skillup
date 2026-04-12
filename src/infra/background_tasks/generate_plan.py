@@ -37,11 +37,11 @@ async def _generate_plan_logic(request_data: dict, container):
         event_bus = await request_container.get(IEventBus)
         config_ai = await request_container.get(AiConfig)
 
-        try:
-            plan_request_id = uuid.UUID(request_data.get("id"))
-            user_request_text = request_data.get("request")
-            user_id = uuid.UUID(request_data.get("user_id"))
+        plan_request_id = uuid.UUID(str(request_data.get("id")))
+        user_request_text = request_data.get("request")
+        user_id = uuid.UUID(str(request_data.get("user_id")))
 
+        try:
             if plan_request_id is None or user_request_text is None or user_id is None:
                 raise ValueError()
 

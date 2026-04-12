@@ -4,6 +4,9 @@ from datetime import datetime
 from uuid import UUID
 from dacite import from_dict, Config
 from src.domain.events.base_event import BaseDomainEvent
+from src.domain.models.plan import PlanStatus
+from src.domain.models.plan_request import PlanRequestStatus
+from src.domain.models.step import StepStatus
 from src.infra.exceptions.event_mapper_exception import EventMapperException
 
 
@@ -33,7 +36,13 @@ class EventMapper:
                 data_class=event_class,
                 data=data,
                 config=Config(
-                    type_hooks={datetime: datetime.fromisoformat, UUID: UUID}
+                    type_hooks={
+                        datetime: datetime.fromisoformat,
+                        UUID: UUID,
+                        PlanRequestStatus: PlanRequestStatus,
+                        StepStatus: StepStatus,
+                        PlanStatus: PlanStatus,
+                    }
                 ),
             )
         except Exception as e:

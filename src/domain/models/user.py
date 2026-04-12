@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from datetime import datetime
+from typing import TypeAlias
 import uuid
 
-type UserID = uuid.UUID
+UserID: TypeAlias = uuid.UUID
 
 
 @dataclass
