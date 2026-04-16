@@ -1,4 +1,4 @@
-![SKILLUP](./docs/logo.png)
+![SKILLUP](https://i-mg24.ru/images/041626101224-h89ey.png)
 
 ### Сервис пошагового обучения с ИИ ассистентом
 
