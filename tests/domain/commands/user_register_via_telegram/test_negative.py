@@ -7,7 +7,6 @@ from src.application.commands.user_register_via_telegram import (
 from src.domain.exceptions.telegram_already_added import TelegramAlreadyAdded
 
 
-@pytest.mark.asyncio
 async def test_execute_raises_exception_if_user_exists():
     """Тест проверки существования пользователя телеграм"""
 

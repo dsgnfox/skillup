@@ -1,6 +1,4 @@
 import uuid
-
-import pytest
 from uuid import uuid4, UUID
 from datetime import datetime
 from dataclasses import dataclass
@@ -9,7 +7,6 @@ from src.domain.events.plan_request_submitted import PlanRequestSubmittedEvent
 from src.domain.models.plan import PlanStatus
 from src.domain.models.plan_request import PlanRequestStatus
 from src.domain.models.step import StepStatus
-from src.domain.models.user import UserID
 from src.infra.mappers.event_mapper import EventMapper
 
 

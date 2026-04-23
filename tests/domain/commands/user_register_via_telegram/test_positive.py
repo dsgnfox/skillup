@@ -1,4 +1,3 @@
-import pytest
 from unittest.mock import AsyncMock
 
 from src.application.commands.user_register_via_telegram import (
@@ -8,7 +7,6 @@ from src.application.commands.user_register_via_telegram import (
 from src.domain.events.user_register import UserRegisterEvent
 
 
-@pytest.mark.asyncio
 async def test_execute_success_registration():
     """Тест успешной регистрации пользователя через телеграм"""
 
