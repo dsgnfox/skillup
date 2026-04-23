@@ -4,6 +4,8 @@
 
 ---
 
+[![Run Tests](https://github.com/dsgnfox/skillup/actions/workflows/run-tests.yml/badge.svg)](https://github.com/dsgnfox/skillup/actions/workflows/run-tests.yml)
+
 #### Запуск для разработки
 
 ```
